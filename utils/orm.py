@@ -89,9 +89,9 @@ def get_data_save_to_file(file_path):
 
 
 if __name__ == "__main__":
-    # test()
+    test()
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     name = 'news.csv'
     folder = 'data'
     path = os.path.join(root, folder, name)
-    get_data_save_to_file(path)
+    # get_data_save_to_file(path)

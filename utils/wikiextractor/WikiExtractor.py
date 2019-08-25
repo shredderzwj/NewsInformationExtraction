@@ -77,7 +77,8 @@ import sys
 
 root_path = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 sys.path.append(root_path)
-from utils.handle import get_words, cht_to_chs   # 切词，转换繁体到简体
+from utils.handle import TextHandle   # 切词，转换繁体到简体
+text_handle = TextHandle()
 
 
 PY2 = sys.version_info[0] == 2
@@ -597,7 +598,7 @@ class Extractor(object):
             # out.write(header)
             for line in text:
                 if line.strip():
-                    line = ' '.join(get_words(cht_to_chs(line.strip())))
+                    line = text_handle(line.strip())
                     if out == sys.stdout:   # option -a or -o -
                         line = line.encode('utf-8')
                     out.write(line)

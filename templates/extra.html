@@ -1,27 +1,44 @@
 <html>
 <head>
-    <title>新闻人物言论自动提取系统</title>
+    <title>提取结果</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/main.css') }}">
     <script src="{{ url_for('static', filename='js/jquery-1.12.4.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/ball.font.js') }}"></script>
 </head>
 
 <body oncontextmenu=self.event.returnValue=false onselectstart="return false">
-	<div class="contain">
+	<div class="contain" >
 		<canvas id="canvasOne" width="500px" height="500px"></canvas>
 	</div>
-    <div class="contain">
-        <p class="title">新 闻 人 物 言 论 自 动 提 取 系 统</p>
+    <div class="contain textarea" style="width: 100%">
+        {% if infos_type == 'str' %}
+            <div class="contain">
+                <p class="title">未提取到数据！原内容如下：</p>
+            </div>
+            <p>{{ infos }}</p>
+        {% else %}
+            <div class="contain">
+                <p class="title">提取结果</p>
+            </div>
+            <center>
+            <table class="contain textarea" style="max-width: 1280px; width: auto;" border="5px" >
+                <tr>
+                    <td>Who</td>
+                    <td>Expression</td>
+                    <td>Content</td>
+                </tr>
+                {% for info in infos %}
+                    <tr>
+                    {% for v in info.values() %}
+                        <td>{{ v }}</td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+            </center>
+        {% endif %}
     </div>
-    <form action="/extra" method="post">
-    <div class="contain">
-		<textarea class="textarea" placeholder="*在此输入新闻内容" name="news"></textarea>
-    </div>
-    <div class="contain">
-        <button type="submit" formtarget="_blank">阿尔法~GO！</button>
-{#        <input type="submit" value="阿尔法~GO！">#}
-    </div>
-    </form>
+
 
 	<script type="text/javascript">
 		window.addEventListener("load", windowLoadHandler, false);
