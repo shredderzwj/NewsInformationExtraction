@@ -77,8 +77,8 @@ class ExpressionWordsGotor(ModelPath):
     def __len__(self):
         return self.len
 
-    def __call__(self, number):
-        if number >= self.len:
+    def __call__(self, number=None):
+        if number is None or number >= self.len:
             return self.expression_words
         else:
             return self.expression_words[:number]

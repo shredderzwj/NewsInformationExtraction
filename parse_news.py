@@ -8,11 +8,12 @@ from collections import defaultdict
 from conf import ModelPath, ExpressionWordsGotor
 from utils.handle import TextHandle
 
+
 class SentenceParse(ModelPath):
     def __init__(self):
         # 获取具有“说”的意思的词列表
         self.wordsgotor = ExpressionWordsGotor()
-        self.expression_words = self.wordsgotor(300)
+        self.expression_words = self.wordsgotor()
         # 分词
         self.segmentor = Segmentor()
         self.segmentor.load(self.ltp_cws)
@@ -127,11 +128,11 @@ class Parse(object):
         # print(self.ners)
         self.contents = self.get_content(self.ners, self.parse)
         infos = [
-            {
-                'who': self.ners[i]['sbv'][1],
-                'expression': self.ners[i]['hed'][1],
-                'what': ''.join(self.contents[i]),
-            } for i in self.contents.keys()
+            [
+                self.ners[i]['sbv'][1],
+                self.ners[i]['hed'][1],
+                ''.join(self.contents[i]),
+            ] for i in self.contents.keys()
         ]
         if infos:
             return infos
