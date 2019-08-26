@@ -2,7 +2,6 @@
 
 
 from flask import Flask, render_template, g, session, url_for, request
-import jieba
 import re
 from parse_news import Parse
 
@@ -48,7 +47,7 @@ def extra():
 def get_fly_words(fly_str):
     fly_words = []
     for x in re.findall(r'\w+', fly_str):
-        fly_words += jieba.lcut(x)
+        fly_words += Parse.sen_parse.get_words(x)
     return {
         'wordList': fly_words,
     }
