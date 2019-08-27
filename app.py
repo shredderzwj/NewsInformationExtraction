@@ -44,6 +44,11 @@ def extra():
     return render_template('extra.html', infos=infos, infos_type=infos_type, **get_fly_words(news))
 
 
+@app.route('/expression-words-operate', methods=['GET', 'POST'])
+def expression_words_operate():
+    pass
+
+
 def get_fly_words(fly_str):
     fly_words = []
     for x in re.findall(r'\w+', fly_str):
@@ -55,4 +60,4 @@ def get_fly_words(fly_str):
 
 if __name__ == "__main__":
     A = 'Shredder'
-    app.run(host='0.0.0.0')
+    app.run()

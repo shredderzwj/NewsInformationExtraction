@@ -5,15 +5,16 @@ from pyltp import SentenceSplitter, Segmentor, Postagger
 from pyltp import NamedEntityRecognizer, Parser, SementicRoleLabeller
 from collections import defaultdict
 
-from conf import ModelPath, ExpressionWordsGotor
+from conf import ModelPath
+from orm import ExpressionWordsOperate
 from utils.handle import TextHandle
 
 
 class SentenceParse(ModelPath):
     def __init__(self):
         # 获取具有“说”的意思的词列表
-        self.wordsgotor = ExpressionWordsGotor()
-        self.expression_words = self.wordsgotor()
+        self.words_operate = ExpressionWordsOperate()
+        self.expression_words = self.words_operate[:]
         # 分词
         self.segmentor = Segmentor()
         self.segmentor.load(self.ltp_cws)
@@ -35,15 +36,15 @@ class SentenceParse(ModelPath):
         postags = self.get_postagger(words)
         ner = self.get_recognizer(words, postags)
         arcs = self.get_parse(words, postags)
-        roles = self.get_rolelabel(words, postags, arcs)
+        # roles = self.get_rolelabel(words, postags, arcs)
         return {
             "words": words,
             "postags": postags,
             "ner": ner,
             "arcs": [(arc.head, arc.relation) for arc in arcs],
-            "roles": [
-                [role.index, [[arg.name, (arg.range.start, arg.range.end)] for arg in role.arguments]] for role in roles
-            ],
+            # "roles": [
+            #     [role.index, [[arg.name, (arg.range.start, arg.range.end)] for arg in role.arguments]] for role in roles
+            # ],
         }
 
     # , [arg.name, [arg.range.start, arg.range.end]]
@@ -126,12 +127,12 @@ class Parse(object):
         # print(self.parse)
         self.ners = self.get_named_entity(self.parse, self.expression_words)
         # print(self.ners)
-        self.contents = self.get_content(self.ners, self.parse)
+        self.contents = self.get_content(self.ners, self.parse, self.sentences)
         infos = [
             [
                 self.ners[i]['sbv'][1],
                 self.ners[i]['hed'][1],
-                ''.join(self.contents[i]),
+                self.contents[i],
             ] for i in self.contents.keys()
         ]
         if infos:
@@ -186,19 +187,45 @@ class Parse(object):
                         }
         return ners
 
-    def get_content(self, ners, parse):
+    def get_content(self, ners, parse, sentence):
         """获取 说 的内容"""
         contents = defaultdict(str)
         for i in ners.keys():
             words = parse[i]['words']
             hed_index = ners[i]['hed'][0]
-            hed_index_next = hed_index + 1
-            if words[hed_index_next] in ['"', "'", "“", "‘", ":", "：", ',', '，']:
-                contents[i] = words[hed_index_next + 1:]
-            elif words[hed_index_next] in ['。', "！", "？", "!", "?"]:
-                contents[i] = words[:hed_index]
-            else:
-                contents[i] = words[hed_index_next:]
+            sbv_index = ners[i]['sbv'][0]
+            content_front_str = ''
+            content_back_str = ''
+            try:
+                hed_index_next = hed_index + 1
+                # 获取引号中的内容
+                if set(words) & {'"', "'", "“", "‘"}:
+                    contents[i] = words[words.index((set(words) & {'"', "'", "“", "‘"}).pop()):]
+                    if not set(words) & {'"', "'", "’", "”"}:
+                        for j in range(5):
+                            content_back_str += sentence[i + 1 + j]
+                            if set(sentence[i + 1 + j]) & {'"', "'", "’", "”"}:
+                                break
+
+                # 表示说的词在句尾，说的内容可能在前面，则获取前面的内容
+                elif words[hed_index_next] in ['。', "！", "？", "!", "?", "…", ".", "……"]:
+                    if set(sentence[i - 1]) & {'"', "'", "’", "”"}:
+                        for j in range(5):
+                            content_front_str = sentence[i - 1 - j] + content_front_str
+                            if set(sentence[i - 1 - j]) & {'"', "'", "“", "‘"}:
+                                break
+                    # content_front_str += sentence[i - 1]
+                    contents[i] = words[:sbv_index]
+
+                # 没有引号的，获取表示说的词后面的内容。
+                elif words[hed_index_next] in [":", "：", ',', '，']:
+                    contents[i] = words[hed_index_next + 1:]
+                else:
+                    contents[i] = words[hed_index_next:]
+            except IndexError:
+                content_front_str += sentence[i - 1]
+                contents[i] = words[:sbv_index]
+            contents[i] = content_front_str + "".join(contents[i]) + content_back_str
         return contents
 
 
