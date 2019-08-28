@@ -33,6 +33,7 @@ class DataBase(object):
     # db_user = 'root'  # 数据库用户名
     # db_pwd = 'AI@2019@ai'  # 数据库密码
     # db_db = 'alpha_zero'
+    # engine = create_engine('%s://%s:%s@%s/%s' % (db_driver, db_user, db_pwd, db_host, db_db))
     # ########################################################################
 
     # #################################### 本地 sqlite########################
@@ -41,9 +42,9 @@ class DataBase(object):
     db_user = ''  # 数据库用户名
     db_pwd = ''  # 数据库密码
     db_db = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'alpha_zero.sqlite')
+    engine = create_engine('%s://%s:%s@%s/%s?check_same_thread=False' % (db_driver, db_user, db_pwd, db_host, db_db))
     # ########################################################################
 
-    engine = create_engine('%s://%s:%s@%s/%s' % (db_driver, db_user, db_pwd, db_host, db_db))
     Session = sessionmaker(engine)
     session = Session()
     Base = declarative_base()

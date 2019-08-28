@@ -2,12 +2,16 @@
 
 
 from flask import Flask, render_template, g, session, url_for, request
+from flask_script import Manager
 import re
+
+from orm import ExpressionWordsOperate
 from parse_news import Parse
 
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 app.secret_key = "klsajdghgkljasglkhasdfhasdgasdfg"
+manager = Manager(app)
 
 
 @app.before_first_request
@@ -35,7 +39,7 @@ def extra():
     news = request.form['news']
     if not news:
         return '<script>alert("没有输入内容！")</script>'
-    parse = Parse(news)
+    parse = Parse(news, ExpressionWordsOperate()[:])
     infos = parse()
     if isinstance(infos, list):
         infos_type = "list"
@@ -59,5 +63,4 @@ def get_fly_words(fly_str):
 
 
 if __name__ == "__main__":
-    A = 'Shredder'
-    app.run()
+    manager.run()
