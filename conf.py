@@ -14,9 +14,7 @@ class ModelPath(object):
     expression_words_path = os.path.join(os.path.dirname(__file__), 'data', 'expression_words.json')
     ltp = r'D:\NLPdata\ltp_data_v3.4.0'         # ltp 模型存放文件夹路径
     if not os.path.exists(ltp):
-        ltp = '/home/student/project-01/ltp-data'
-    if not os.path.exists(ltp):
-        ltp = '/home/student/project-01/ltp_data_v3.4.0'
+        ltp = '/home/student/project/project-01/ltp_data'
     ltp_cws = os.path.join(ltp, 'cws.model')
     ltp_ner = os.path.join(ltp, 'ner.model')
     ltp_parser = os.path.join(ltp, 'parser.model')
