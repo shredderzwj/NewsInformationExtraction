@@ -4,6 +4,7 @@
 from flask import Flask, render_template, g, session, url_for, request
 from flask_script import Manager
 import re
+import base64
 
 from orm import ExpressionWordsOperate
 from parse_news import Parse
@@ -30,7 +31,7 @@ def index():
         新闻人物言论自动提取。 
         新闻人物言论即是在报道的新闻中，某个人物、团体或机构在某个时间、某个地点表达某种观点、意见或态度。
     """
-    return render_template('index.html', fly_str=fly_str)
+    return render_template('index.html', fly_str=base64_encode(fly_str))
 
 
 @app.route('/extra', methods=['GET', 'POST'])
@@ -49,7 +50,7 @@ def extra():
         infos_type = "list"
     else:
         infos_type = 'str'
-    return render_template('extra.html', infos=infos, infos_type=infos_type, fly_str=news)
+    return render_template('extra.html', infos=infos, infos_type=infos_type, fly_str=base64_encode(news))
 
 
 @app.route('/expression-words-operate', methods=['GET', 'POST'])
@@ -59,9 +60,9 @@ def expression_words_operate():
 
 @app.route('/fly-words')
 def fly_words():
-    fly_str = request.args.get('s')
-    print(fly_str)
-    if not fly_str:
+    fly_str_base64 = request.args.get('s')
+    fly_str = base64_decode(fly_str_base64)
+    if not fly_str_base64:
         fly_str = "新闻人物言论自动提取。 "
     return render_template('fly_words.html', **get_fly_words_list(fly_str))
 
@@ -73,6 +74,15 @@ def get_fly_words_list(fly_str):
     return {
         'wordList': fly_words,
     }
+
+
+def base64_encode(s):
+    return base64.encodebytes(s.encode()).decode().replace('\n', '').replace('/', '_').replace("+", '-')
+
+
+def base64_decode(base64_str):
+    base64_str = base64_str.replace('_', '/').replace("-", '+')
+    return base64.decodebytes(base64_str.encode()).decode()
 
 
 if __name__ == "__main__":
