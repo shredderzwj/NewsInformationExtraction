@@ -61,9 +61,15 @@ def expression_words_operate():
 @app.route('/fly-words')
 def fly_words():
     fly_str_base64 = request.args.get('s')
-    fly_str = base64_decode(fly_str_base64)
-    if not fly_str_base64:
-        fly_str = "新闻人物言论自动提取。 "
+    fly_str = ''
+    try:
+        fly_str = base64_decode(fly_str_base64)
+    except :
+        pass
+    if not fly_str:
+        fly_str = fly_str_base64
+    if not fly_str:
+        fly_str = "没有内容"
     return render_template('fly_words.html', **get_fly_words_list(fly_str))
 
 
