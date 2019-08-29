@@ -50,7 +50,7 @@ def extra():
         infos_type = "list"
     else:
         infos_type = 'str'
-    return render_template('extra.html', infos=infos, infos_type=infos_type, fly_str=base64_encode(news))
+    return render_template('extra.html', infos=infos, infos_type=infos_type, fly_str=base64_encode(news[:500]))
 
 
 @app.route('/expression-words-operate', methods=['GET', 'POST'])
