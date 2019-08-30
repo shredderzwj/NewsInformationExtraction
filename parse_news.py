@@ -164,27 +164,19 @@ class Parse(object):
             # sentences += [line.strip()]
         return sentences
 
-    ## changed ##
     def __get_expression_sentences(self, sentences):
-        """ 检测句子是否含有 说 的意思 """
-        # 去重
-        sentences = list(set(sentences))
-        
-        # 通过求交集的方式找与“说”意思相近的单词
+        # 检测句子是否含有 说 的意思
         parse = {}
         expression_words = defaultdict(list)
         sentences_goal = {}
         for i, sen in enumerate(sentences):
-            # print(i, sen)
-            sentences_goal[i] = sen
-            parse[i] = sen_parse(sen)
-            words = parse[i]["words"]
-            overlap = [val for val in list(words) if val in expression_words_all]
-            if overlap != []:
-                expression_words[i] = overlap
+            for word in self.active_words:
+                if word in sen:
+                    sentences_goal[i] = sen
+                    parse[i] = self.sen_parse(sen)
+                    expression_words[i].append(word)    # 一句话中可能有多个表示说的词
         return sentences_goal, parse, expression_words
 
-    ## changes ##
     def get_named_entity(self, parse, expression_words):
         """获取 命名主体"""
         ners = defaultdict(dict)
@@ -194,41 +186,33 @@ class Parse(object):
             words = parse[i]['words']
             arcs = parse[i]['arcs']
             expression_word_list = expression_words[i]
-
             for expression_word in expression_word_list:
-
                 if expression_word not in words:
                     continue
 
                 expression_word_index = words.index(expression_word)
 
+                if 0 not in arcs[expression_word_index]:
+                    continue
+
                 if 'v' not in list(postags[expression_word_index]):
                     continue
 
-                # 如果“说”的同义词不是句子的核心，那么句子的核心与其是并列关系呢（COO）？
-                # 与句子的核心HED有COO关系的词
-                if 0 in arcs[expression_word_index] or 0 in arcs[arcs[expression_word_index][0] - 1]:
-                    for j, (k, v) in enumerate(arcs):
-                        
-                        postags_list = ['j', 'n', 'nh', 'ni', 'ns', 'nz']
-                        # postags_list = ['j', 'k', 'm', 'nd', 'nl', 'nt', 'n', 'nh', 'ni', 'ns', 'nz']
-                        # 根据依存句法分析、命名实体识别、和词性标注。下面 if 语句解释为：
-                        # （找到主谓关系 and 主语要与谓语关联） and（主语要识别为命名实体or 是一些词性可以表示实体的名词）
-                        
-                        if (v == 'SBV' and (k == expression_word_index + 1 or k == arcs[expression_word_index][0])) and (set(list(ner[j])) & {"S", "B", "I", "E"} or postags[j] in postags_list):
-                            sbv_start = j
-                            # 获取修饰词
-                            # for m in range(5):
-                            for m in range(5):  
-                                if j - 1 - m >= 0:
-                                    if arcs[j - 1 - m][1] == 'ATT':  # and arcs[j - 1 - m][0] - 1 == j:
-                                        sbv_start = j - 1 - m
-                            ners[i] = {
-                                'hed': (expression_word_index, expression_word),
-                                'sbv': ((sbv_start, j), ''.join(words[sbv_start:j+1])),
-                            }
-                else:
-                    continue
+                for j, (k, v) in enumerate(arcs):
+                    postags_list = ['j', 'n', 'nh', 'ni', 'ns', 'nz']
+                    # 根据依存句法分析、命名实体识别、和词性标注。下面 if 语句解释为：
+                    # （找到主谓关系 and 主语要与谓语关联）              and（主语要识别为命名实体                      or 是一些词性可以表示实体的名词）
+                    if (v == 'SBV' and k == expression_word_index + 1) and (set(list(ner[j])) & {"S", "B", "I", "E"} or postags[j] in postags_list):
+                        sbv_start = j
+                        # 获取修饰词
+                        for m in range(5):
+                            if j - 1 - m >= 0:
+                                if arcs[j - 1 - m][1] == 'ATT':     # and arcs[j - 1 - m][0] - 1 == j:
+                                    sbv_start = j - 1 - m
+                        ners[i] = {
+                            'hed': (expression_word_index, expression_word),
+                            'sbv': ((sbv_start, j), ''.join(words[sbv_start:j+1])),
+                        }
         return ners
 
     def get_content(self, ners, parse, sentence):
