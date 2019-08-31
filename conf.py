@@ -28,21 +28,21 @@ class ModelPath(object):
 class DataBase(object):
     """设置数据库参数"""
     # #################################### 服务器 ############################
-    # db_driver = "mysql+pymysql"  # 设置数据库软件[驱动]
-    # db_host = 'rm-8vbwj6507z6465505ro.mysql.zhangbei.rds.aliyuncs.com'  # 数据库地址
-    # db_user = 'root'  # 数据库用户名
-    # db_pwd = 'AI@2019@ai'  # 数据库密码
-    # db_db = 'alpha_zero'
-    # engine = create_engine('%s://%s:%s@%s/%s' % (db_driver, db_user, db_pwd, db_host, db_db))
+    db_driver = "mysql+pymysql"  # 设置数据库软件[驱动]
+    db_host = 'rm-8vbwj6507z6465505ro.mysql.zhangbei.rds.aliyuncs.com'  # 数据库地址
+    db_user = 'root'  # 数据库用户名
+    db_pwd = 'AI@2019@ai'  # 数据库密码
+    db_db = 'alpha_zero'
+    engine = create_engine('%s://%s:%s@%s/%s' % (db_driver, db_user, db_pwd, db_host, db_db))
     # ########################################################################
 
     # #################################### 本地 sqlite########################
-    db_driver = "sqlite"  # 设置数据库软件[驱动]
-    db_host = ''  # 数据库地址
-    db_user = ''  # 数据库用户名
-    db_pwd = ''  # 数据库密码
-    db_db = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'alpha_zero.sqlite')
-    engine = create_engine('%s://%s:%s@%s/%s?check_same_thread=False' % (db_driver, db_user, db_pwd, db_host, db_db))
+    # db_driver = "sqlite"  # 设置数据库软件[驱动]
+    # db_host = ''  # 数据库地址
+    # db_user = ''  # 数据库用户名
+    # db_pwd = ''  # 数据库密码
+    # db_db = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', 'alpha_zero.sqlite')
+    # engine = create_engine('%s://%s:%s@%s/%s?check_same_thread=False' % (db_driver, db_user, db_pwd, db_host, db_db))
     # ########################################################################
 
     Session = sessionmaker(engine)

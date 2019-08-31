@@ -84,12 +84,10 @@ def expression_words_operate():
         try:
             _id = int(request.args.get("del"))
             word = operate.del_word_by_id(_id)
-            print(_id, word)
             if word:
                 info['delete'].append(word)
         except:
             pass
-    print(info)
     words_dict = operate.get_all()
     return render_template('manager.html', words=words_dict, info=info)
 
